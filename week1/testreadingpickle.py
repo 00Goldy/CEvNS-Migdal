@@ -1,7 +1,10 @@
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+from scipy.integrate import trapezoid
 import os
+
+
 
 def lire_spectre_neutrino(fichier_pkl):
     if not os.path.exists(fichier_pkl):
@@ -27,16 +30,21 @@ def lire_spectre_neutrino(fichier_pkl):
     flux = df['spectrum_value_norm']
 
     # Affichage du spectre
+    print(energies)
+    print(flux)
+
     plt.figure(figsize=(8,5))
     plt.plot(energies, flux, label="Neutrino Spectra")
-    plt.xlabel("Énergie (MeV)")
-    plt.ylabel("Flux (a.u.)")
+    plt.xlabel("Recoil Energy (keV)")
+    plt.ylabel("Diff Rate (a.u.)")
     plt.xscale("log")
     plt.yscale("log")
     plt.title("Neutrinos spectra via CEvNS")
     plt.legend()
     plt.grid(True)
     plt.show()
+
+    print(trapezoid(flux,energies))
 
     return energies, flux
 
