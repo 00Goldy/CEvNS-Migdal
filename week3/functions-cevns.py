@@ -39,44 +39,109 @@ def dsigma_dER(E_v, E_R) :
     dsigma = np.array(dsigma) #convert into an np.array to easy plotting
 
     return dsigma
-#Test
-'''
-E_v = np.linspace(0.1, 30, 1000)
-ER_fixed_values = [0.0001, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02]
 
-plt.figure(figsize=(10, 6))
-
-for i in range(len(ER_fixed_values)):
-    dsigma = dsigma_dER(E_v, ER_fixed_values[i])
-    plt.plot(E_v, dsigma, label=f"$E_R$ = {ER_fixed_values[i]*1000:.0f} keV")
-
-plt.title(r"Differential Cross Section $\frac{d\sigma}{dE_R}$ vs $E_\nu$")
-plt.xlabel("Neutrino Energy $E_\\nu$ [MeV]")
-plt.ylabel(r"$\frac{d\sigma}{dE_R}$ [MeV$^{-1}$.cm$^2$]")
-plt.xlim(0.1, 30)
-plt.legend(title="Fixed $E_R$")
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
-'''
 ################### Now for the total solar neutrino flux
 
+#Folder containing data from fluxes
 path = "../dataflux"
+
+energy = []
+flux = []
+
+# Function to read an concatenate energies and fluxes from sources (contained in path)
+
+def parse_data_block(filepath):
+    with open(filepath, 'r') as file:
+        data_block = file.read()
+    
+    lines = data_block.strip().split('\n')
+    energies = []
+    distrib = []
+
+    for line in lines:
+        parts = line.strip().split()
+        
+        # For 2 columns data file
+        if len(parts) == 2:
+            try:
+                e, phi = map(float, parts)
+                energies.append(e)
+                distrib.append(phi)
+            except ValueError:
+                continue
+
+        # For 4 columns data file
+        elif len(parts) == 4:
+            try:
+                e = float(parts[0])
+                phi = float(parts[2])
+                energies.append(e)
+                distrib.append(phi)
+            except ValueError:
+                continue
+
+        # For 8 columns data file
+        elif len(parts) == 8:
+            try:
+                for i in range(0, 8, 2):
+                    e = float(parts[i])
+                    phi = float(parts[i+1])
+                    energies.append(e)
+                    distrib.append(phi)
+            except ValueError:
+                continue
+
+    return np.array(energies), np.array(distrib)
+
+
+################### Un-Normalizing 
+
+N7Be = 4.8e9
+N8B = 5e6
+N13N = 2.9e8
+N15O = 2.3e8
+N17F = 5.6e6
+Npp = 6e10
+Nhep = 8e3
+
+####################
 
 interpol_flux = {}
 
-# Boucle sur tous les fichiers du dossier
-for file in os.listdir(path):
-    fullpath = os.path.join(path, file)
+for input_file in os.listdir(path):
+    fullpath = os.path.join(path, input_file)
+    namesource = input_file.replace(".dat", "")
+    print(f"Reading {namesource}...")
 
-    namesource = file.replace(".dat", "")
+    energy, flux = parse_data_block(fullpath)
 
-    df = pd.read_csv(fullpath)
+    if len(energy) == 0:
+        print(f"WARNING : {namesource} is empty.")
+        continue
 
-    E = df['E'].values
-    phi = df['phi'].values
+    if namesource == '7Be-384' or namesource == '7Be-861':
+        if namesource == '7Be-384':
+            energy += 384
+        else:
+            energy += 861
+        flux *= N7Be
+    
+    ## Let's un-normalize fluxes
 
-    interp = interp1d(E, phi, bounds_error=False, fill_value=0)
+    if namesource == '8B':
+        flux *= N8B
+    if namesource == '13N':
+        flux *= N13N
+    if namesource == '15O':
+        flux *= N15O
+    if namesource == '17F':
+        flux *= N17F
+    if namesource == 'pp':
+        flux *= Npp
+    if namesource == 'hep':
+        flux *= Nhep
+    
+    interp = interp1d(energy, flux, bounds_error = False, fill_value = 0)
 
     interpol_flux[namesource] = interp
 
@@ -85,13 +150,4 @@ for file in os.listdir(path):
 def total_flux(Ev):
     return sum(interp(Ev) for interp in interpol_flux.values())
 
-plt.figure(figsize=(10, 6))
-plt.plot(E_v, total_flux(E_v))
-plt.title(r"Differential Cross Section $\frac{d\sigma}{dE_R}$ vs $E_\nu$")
-plt.xlabel("Neutrino Energy $E_\\nu$ [MeV]")
-plt.ylabel(r"$\frac{d\sigma}{dE_R}$ [MeV$^{-1}$.cm$^2$]")
-plt.xlim(0.1, 30)
-plt.legend(title="Fixed $E_R$")
-plt.grid(True, which='both', linestyle='--', linewidth=0.5)
-plt.tight_layout()
-plt.show()
+
