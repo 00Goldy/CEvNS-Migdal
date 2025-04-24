@@ -9,7 +9,6 @@ from scipy.interpolate import interp1d
 
 N = 77
 Z = 54
-G_F = 1.1664e-11 # MeV^-2 Fermi's constant
 M_Xe = 131.293 
 m_A = M_Xe * 931.5  # MeV
 Q_V = N - 0.1084 * Z
@@ -27,13 +26,16 @@ def dsigma_dER(E_v, E_R) :
     ER_max = (2 * E_v**2) / (m_A + 2 * E_v)
     if E_R > ER_max:
         dsigma.append(0) #There is no CEvNS past ER_max so no cross-section
-
+        print("CPT")
     else:
-
         val = (G_F**2 * m_A) / (4 * np.pi) * Q_V**2 * (1 - ((m_A * E_R) / (2 * E_v**2)))
         dsigma.append(val)
     dsigma = np.array(dsigma) #convert into an np.array for easy plotting
-
+    #print(dsigma)
+    #print('Pipou')
+    #print(E_v)
+    #print('Pipoudou')
+    #print(E_R)
     return dsigma
 
 ################### Now for the total solar neutrino flux
@@ -145,7 +147,6 @@ for input_file in os.listdir(path):
 
 def total_flux(Ev):
     Tot = sum(interp(Ev) for interp in interpol_flux.values())
-    Tot *= 3.154e7
     return Tot
 
 
