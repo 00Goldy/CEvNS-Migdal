@@ -24,19 +24,15 @@ E_v = np.linspace(0.1, 30, 1000)
 def dsigma_dER(E_v, E_R) :
 
     dsigma = []
+    ER_max = (2 * E_v**2) / (m_A + 2 * E_v)
+    if E_R > ER_max:
+        dsigma.append(0) #There is no CEvNS past ER_max so no cross-section
 
-    for Ev in E_v:
+    else:
 
-        ER_max = (2 * Ev**2) / (m_A + 2 * Ev)
-
-        if E_R > ER_max:
-            dsigma.append(0) #There is no CEvNS past ER_max so no cross-section
-
-        else:
-
-            val = (G_F**2 * m_A) / (4 * np.pi) * Q_V**2 * (1 - ((m_A * E_R) / (2 * Ev**2)))
-            dsigma.append(val)
-    dsigma = np.array(dsigma) #convert into an np.array to easy plotting
+        val = (G_F**2 * m_A) / (4 * np.pi) * Q_V**2 * (1 - ((m_A * E_R) / (2 * E_v**2)))
+        dsigma.append(val)
+    dsigma = np.array(dsigma) #convert into an np.array for easy plotting
 
     return dsigma
 
@@ -148,6 +144,8 @@ for input_file in os.listdir(path):
 ################### Defining function for dflux/dEv
 
 def total_flux(Ev):
-    return sum(interp(Ev) for interp in interpol_flux.values())
+    Tot = sum(interp(Ev) for interp in interpol_flux.values())
+    Tot *= 3.154e7
+    return Tot
 
 

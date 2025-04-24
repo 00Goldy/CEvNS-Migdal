@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from scipy.integrate import trapezoid
 import os
 
-
-
 def lire_spectre_neutrino(fichier_pkl):
     if not os.path.exists(fichier_pkl):
         raise FileNotFoundError(f"Le fichier '{fichier_pkl}' n'existe pas.")
@@ -32,6 +30,8 @@ def lire_spectre_neutrino(fichier_pkl):
     # Affichage du spectre
     print(energies)
     print(flux)
+    print('Integrl is :')
+    print(trapezoid(flux,energies))
 
     plt.figure(figsize=(8,5))
     plt.plot(energies, flux, label="Neutrino Spectra")
@@ -44,7 +44,7 @@ def lire_spectre_neutrino(fichier_pkl):
     plt.grid(True)
     plt.show()
 
-    print(trapezoid(flux,energies))
+    
 
     return energies, flux
 
