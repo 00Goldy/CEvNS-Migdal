@@ -24,9 +24,10 @@ def dsigma_dER(E_v, E_R) :
 
     dsigma = []
     ER_max = (2 * E_v**2) / (m_A + 2 * E_v)
+    #print(ER_max)
     if E_R > ER_max:
         dsigma.append(0) #There is no CEvNS past ER_max so no cross-section
-        print("CPT")
+        #print("CPT")
     else:
         val = (G_F**2 * m_A) / (4 * np.pi) * Q_V**2 * (1 - ((m_A * E_R) / (2 * E_v**2)))
         dsigma.append(val)
