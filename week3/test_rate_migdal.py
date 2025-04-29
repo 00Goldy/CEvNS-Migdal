@@ -6,7 +6,7 @@ import wimprates as wr
 from functions_cevns import dsigma_dER
 from functions_cevns import total_flux
 
-E_e = np.linspace(1 ,70000, 10) #eV
+E_e = np.linspace(1e-1 ,100, 100) #eV
 E_v = np.linspace(0.6 ,30, 1000) #MeV
 dsigma = []
 #print(total_flux(0.4))
@@ -25,16 +25,16 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
+print(nu.me/nu.kg)
 
 Rate = wr.rate_migdal_cevns(
     E_e,
     total_flux,
     dsigma_dER,
-    E_nu_min = 0.6,
 )
 print(Rate)
 """
-plt.plot(E_e, Rate, ":",label='Migdal Rate', color='black')
+plt.plot(E_e, Rate, 'o', label='Migdal Rate', color='black')
 plt.title(r"Migdal Rate VS $E_e$")
 plt.xlabel(r"Electron Energy $E_e$")
 plt.ylabel("Migdal Rate")
