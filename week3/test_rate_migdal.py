@@ -25,14 +25,14 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
-print(nu.me/nu.kg)
-
 Rate = wr.rate_migdal_cevns(
     E_e,
     total_flux,
     dsigma_dER,
 )
+
 print(Rate)
+
 """
 plt.plot(E_e, Rate, 'o', label='Migdal Rate', color='black')
 plt.title(r"Migdal Rate VS $E_e$")
