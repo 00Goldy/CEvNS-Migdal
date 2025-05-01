@@ -50,7 +50,7 @@ def lire_spectre_neutrino(fichier_pkl):
 
 # Exemple d'utilisation
 if __name__ == "__main__":
-    fichier = "CEvNS_solar_spectrum.pkl"
+    fichier = "136Xe_spectrum.pkl"
     try:
         energies, flux = lire_spectre_neutrino(fichier)
     except Exception as e:

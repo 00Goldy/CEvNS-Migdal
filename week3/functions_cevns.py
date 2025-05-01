@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import trapezoid
 from scipy.interpolate import interp1d
+from wimprates import helm_form_factor_squared
 
 ################### CONSTANTS
 
@@ -17,7 +18,7 @@ G_F = conv * 1.1664e-11 # MeV^-2 Fermi's constant in units of hbar*c
 
 # Domain of Ev : from 0.1 to 30 MeV
 E_v = np.linspace(0.1, 30, 1000)
-
+    
 ################### Defining function for dsigma/dER
 
 def dsigma_dER(E_v, E_R) :
@@ -41,113 +42,46 @@ def dsigma_dER(E_v, E_R) :
 
 ################### Now for the total solar neutrino flux
 
-#Folder containing data from fluxes
-path = "../dataflux"
+# Lire la base de données CSV générée
+df = pd.read_csv("../dataflux/total_solar_flux.csv")  # ou mettre le chemin complet si besoin
 
-energy = []
-flux = []
+energy = df["Energy [MeV]"].values
+flux = df["Total Flux [cm⁻²·s⁻¹·MeV⁻¹]"].values
 
-# Function to read an concatenate energies and fluxes from sources (contained in path)
+# Créer l'interpolation
+total_flux_interp = interp1d(energy, flux, bounds_error=False, fill_value=0)
 
-def parse_data_block(filepath):
-    with open(filepath, 'r') as file:
-        data_block = file.read()
-    
-    lines = data_block.strip().split('\n')
-    energies = []
-    distrib = []
-
-    for line in lines:
-        parts = line.strip().split()
-        
-        # For 2 columns data file
-        if len(parts) == 2:
-            try:
-                e, phi = map(float, parts)
-                energies.append(e)
-                distrib.append(phi)
-            except ValueError:
-                continue
-
-        # For 4 columns data file
-        elif len(parts) == 4:
-            try:
-                e = float(parts[0])
-                phi = float(parts[2])
-                energies.append(e)
-                distrib.append(phi)
-            except ValueError:
-                continue
-
-        # For 8 columns data file
-        elif len(parts) == 8:
-            try:
-                for i in range(0, 8, 2):
-                    e = float(parts[i])
-                    phi = float(parts[i+1])
-                    energies.append(e)
-                    distrib.append(phi)
-            except ValueError:
-                continue
-
-    return np.array(energies), np.array(distrib)
-
-
-################### Un-Normalizing 
-
-N7Be = 4.8e9
-N8B = 5e6
-N13N = 2.9e8
-N15O = 2.3e8
-N17F = 5.6e6
-Npp = 6e10
-Nhep = 8e3
-
-####################
-
-interpol_flux = {}
-
-for input_file in os.listdir(path):
-    fullpath = os.path.join(path, input_file)
-    namesource = input_file.replace(".dat", "")
-    print(f"Reading {namesource}...")
-
-    energy, flux = parse_data_block(fullpath)
-
-    if len(energy) == 0:
-        print(f"WARNING : {namesource} is empty.")
-        continue
-
-    if namesource == '7Be-384' or namesource == '7Be-861':
-        if namesource == '7Be-384':
-            energy += 384
-        else:
-            energy += 861
-        flux *= N7Be
-    
-    ## Let's un-normalize fluxes
-
-    if namesource == '8B':
-        flux *= N8B
-    if namesource == '13N':
-        flux *= N13N
-    if namesource == '15O':
-        flux *= N15O
-    if namesource == '17F':
-        flux *= N17F
-    if namesource == 'pp':
-        flux *= Npp
-    if namesource == 'hep':
-        flux *= Nhep
-    
-    interp = interp1d(energy, flux, bounds_error = False, fill_value = 0)
-
-    interpol_flux[namesource] = interp
-
-################### Defining function for dflux/dEv
-
+# Fonction d'accès au flux total
 def total_flux(Ev):
-    Tot = sum(interp(Ev) for interp in interpol_flux.values())
-    return Tot
+    return total_flux_interp(Ev)
+"""
+plt.figure(figsize=(10, 6))
+plt.plot(E_v, dsigma, ":",label='Cross section', color='black')
+plt.title(r"CS VS $E_\nu$")
+plt.xlabel(r"Neutrino Energy $E_\nu$")
+plt.ylabel("Cross section")
+#plt.yscale('log')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+"""
 
+#############################################################
+# Flamedisx CEvNS Rate
 
+df = pd.read_pickle("../flamedisxdata/CEvNS_solar_spectrum.pkl")  # ou mettre le chemin complet si besoin
+
+energy = np.array(df["energy_keV"].values)
+rate = df["spectrum_value_norm"].values
+
+print(energy)
+print(rate)
+
+#energy *= 1e3 #From keV to eV
+# Créer l'interpolation
+total_flux_interp = interp1d(energy, rate, bounds_error=False, fill_value=0)
+
+# Fonction d'accès au flux total
+def rate_flamedisx(E_nr):
+    return total_flux_interp(E_nr)
