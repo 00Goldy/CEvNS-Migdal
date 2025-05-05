@@ -1,4 +1,5 @@
 import pickle
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.integrate import trapezoid
@@ -50,7 +51,7 @@ def lire_spectre_neutrino(fichier_pkl):
 
 # Exemple d'utilisation
 if __name__ == "__main__":
-    fichier = "Migdal_CEvNS_solar_spectrum.pkl"
+    fichier = "CEvNS_solar_spectrum.pkl"
     try:
         energies, flux = lire_spectre_neutrino(fichier)
     except Exception as e:
