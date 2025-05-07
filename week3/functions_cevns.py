@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import trapezoid
 from scipy.interpolate import interp1d
-from wimprates import helm_form_factor_squared
 
 ################### CONSTANTS
 

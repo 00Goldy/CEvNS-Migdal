@@ -33,6 +33,7 @@ def lire_spectre_neutrino(fichier_pkl):
     print(flux)
     print('Integrl is :')
     print(trapezoid(flux,energies))
+    print(np.sum(flux))
 
     plt.figure(figsize=(8,5))
     plt.plot(energies, flux, label="Neutrino Spectra")
@@ -51,7 +52,7 @@ def lire_spectre_neutrino(fichier_pkl):
 
 # Exemple d'utilisation
 if __name__ == "__main__":
-    fichier = "CEvNS_solar_spectrum.pkl"
+    fichier = "New_CEvNS_solar_spectrum.pkl"
     try:
         energies, flux = lire_spectre_neutrino(fichier)
     except Exception as e:

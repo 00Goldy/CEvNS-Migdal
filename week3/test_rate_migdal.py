@@ -8,7 +8,7 @@ from functions_cevns import dsigma_dER
 from functions_cevns import total_flux
 from functions_cevns import rate_flamedisx
 
-E_e = np.linspace(1e-1 ,1e4, 1000) #eV
+E_e = np.logspace(0 ,4+np.log10(7), 100) #eV
 E_v = np.linspace(0.05 ,20, 1000) #MeV
 N_A = 6.022e23
 M_Xe = 131.29  # g/mol
@@ -65,6 +65,8 @@ plt.grid(True)
 plt.tight_layout()
 plt.show()
 
+print(nu.MeV/nu.eV)
+
 plt.figure(figsize=(10, 6))
 plt.plot(E_v, dsigma, ":",label='CS', color='black')
 plt.title(r"CS VS $E_\nu$")
@@ -77,8 +79,9 @@ plt.show()
 
 Rate = wr.rate_migdal_cevns(
     E_e,
+    total_flux,
+    dsigma_dER,
     rate_flamedisx,
-    unit_fun,
 )
 
 print(Rate)
